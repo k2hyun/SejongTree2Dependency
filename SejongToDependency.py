@@ -3,11 +3,11 @@ import re, os, sys, argparse, time
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-root_dir', type=str, required=True)
-    parser.add_argument('-file_name', type=str, default="")
-    parser.add_argument('-save_file', type=str, default="result")
-    parser.add_argument('-head_initial_file', type=str, default="./Rules/linear_rules.txt")
-    parser.add_argument('-head_final', type=int, default=0)
+    parser.add_argument('--root_dir', type=str, required=True)
+    parser.add_argument('--file_name', type=str, default="")
+    parser.add_argument('--save_file', type=str, default="result")
+    parser.add_argument('--head_initial_file', type=str, default="./Rules/linear_rules.txt")
+    parser.add_argument('--head_final', type=int, default=0)
 
     opt = parser.parse_args()
     head_final = bool(opt.head_final)
@@ -40,15 +40,20 @@ def main():
                 continue
 
             f_text = "".join([line for line in open(os.path.join(corpus_dir_path, f_path), encoding='utf-8')])
-            text = f_text.split("<body>")[1].split("</body>")[0].strip()
+            if f_text.find("<body>") == -1:
+                text = f_text.strip()
+            else:
+                text = f_text.split("<body>")[1].split("</body>")[0].strip()
 
-            sent_tree_s = text.split("\n\n")
+            sent_tree_s = text.split("\n; ")
 
+            old_len = len(sent_tree_list)
             for sent_tree in sent_tree_s:
                 sent = sent_tree.split("\n")[0].replace("; ", "")
                 tree = "\n".join(sent_tree.split("\n")[1:])
 
                 sent_tree_list.append((sent, tree, f_path))
+            print(f"{f_path} {len(sent_tree_list)-old_len}")
 
     print("SENTENCES SIZE: {}".format(len(sent_tree_list)))
 
