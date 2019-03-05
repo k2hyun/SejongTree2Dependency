@@ -461,6 +461,8 @@ class ConstitiuentStructureTree(object):
         return node
 
     def find(self, node, method, depth=0):
+        if node is None:
+            return None, depth
         if method == 'rmn':
             if node.right_child is None:
                 return node, depth
@@ -523,33 +525,36 @@ class ConstitiuentStructureTree(object):
                         except_PRN = False
                         left_context_node = None
                         right_context_node = None
-                        if left_context_rule is not None and right_most_node.index - 1 >= 0:
+                        if left_context_rule is not None and right_most_node and right_most_node.index - 1 >= 0:
                             left_context_node = self.find_node_index(right_most_node.index - 1)
-                        elif left_context_rule is not None and right_most_node.index - 1 == -1:
+                        elif left_context_rule is not None and right_most_node and right_most_node.index - 1 == -1:
                             left_context_node = ""
-                        if right_context_rule is not None and left_most_node.index + 1 < self.length:
+                        if right_context_rule is not None and left_most_node and left_most_node.index + 1 < self.length:
                             right_context_node = self.find_node_index(left_most_node.index + 1)
-                        elif right_context_rule is not None and left_most_node.index + 1 == self.length:
+                        elif right_context_rule is not None and left_most_node and left_most_node.index + 1 == self.length:
                             right_context_node = ""
 
-                        t_left_most_node_label = left_most_node.label
-                        t_right_most_node_label = right_most_node.label
-                        if self.checkPattern(self.strToPattern("L", self.pos_list, label=True), left_most_node.label):
+                        t_left_most_node_label = ""
+                        t_right_most_node_label = ""
+                        if left_most_node and \
+                           self.checkPattern(self.strToPattern("L", self.pos_list, label=True), left_most_node.label):
                             left_most_node_parent = self.find_node_index(left_most_node.parent_id, total_index=True)
-                            t_left_most_node_label = "{}({})".format(t_left_most_node_label, left_most_node_parent.label)
+                            t_left_most_node_label = "{}({})".format(left_most_node.label, left_most_node_parent.label)
                             except_PRN = True
-                        if self.checkPattern(self.strToPattern("R", self.pos_list, label=True), right_most_node.label):
+                        if right_most_node and \
+                           self.checkPattern(self.strToPattern("R", self.pos_list, label=True), right_most_node.label):
                             right_most_node_parent = self.find_node_index(right_most_node.parent_id, total_index=True)
-                            t_right_most_node_label = "{}({})".format(t_right_most_node_label, right_most_node_parent.label)
+                            t_right_most_node_label = "{}({})".format(right_most_node.label, right_most_node_parent.label)
                             except_PRN = True
 
-                        if self.checkPattern(parent_label_rule, node.label) and \
-                            self.checkPattern(left_label_rule, t_right_most_node_label) and \
-                            self.checkPattern(left_eojul_rule, right_most_node, True) and \
-                            self.checkPattern(right_label_rule, t_left_most_node_label) and \
-                            self.checkPattern(right_eojul_rule, left_most_node, False) and \
-                            self.checkPattern(left_context_rule, left_context_node, True) and \
-                            self.checkPattern(right_context_rule, right_context_node, False):
+                        if right_most_node and left_most_node and \
+                           self.checkPattern(parent_label_rule, node.label) and \
+                           self.checkPattern(left_label_rule, t_right_most_node_label) and \
+                           self.checkPattern(left_eojul_rule, right_most_node, True) and \
+                           self.checkPattern(right_label_rule, t_left_most_node_label) and \
+                           self.checkPattern(right_eojul_rule, left_most_node, False) and \
+                           self.checkPattern(left_context_rule, left_context_node, True) and \
+                           self.checkPattern(right_context_rule, right_context_node, False):
 
                             if left_context_rule is not None and isinstance(left_context_node, Node) and self.checkPattern(left_context_rule, left_context_node, True):
                                 linear_rules.setdefault((left_context_node.index, right_most_node.index, left_most_node.index), [False, False])
@@ -575,7 +580,7 @@ class ConstitiuentStructureTree(object):
                                 break
                     except_PRN = False
 
-                    if not linear_rule_check:
+                    if not linear_rule_check and right_most_node and right_node and node.left_child and node.right_child:
                         head_list.append((right_most_node.index, right_node.index, False, False, (node.left_child.label, node.right_child.label), except_PRN))
 
         def _find_head_final(node, head_list, linear_rules):
@@ -597,19 +602,20 @@ class ConstitiuentStructureTree(object):
                             left_context_node = self.find_node_index(right_most_node.index - 1)
                         elif left_context_rule is not None and right_most_node.index - 1 == -1:
                             left_context_node = ""
-                        if right_context_rule is not None and left_most_node.index + 1 < self.length:
+                        if right_context_rule is not None and left_most_node and left_most_node.index + 1 < self.length:
                             right_context_node = self.find_node_index(left_most_node.index + 1)
-                        elif right_context_rule is not None and left_most_node.index + 1 == self.length:
+                        elif right_context_rule is not None and left_most_node and left_most_node.index + 1 == self.length:
                             right_context_node = ""
 
-                        if self.checkPattern(parent_label_rule, node.label) and \
-                                self.checkPattern(left_label_rule, right_most_node.label) and \
-                                self.checkPattern(left_eojul_rule, right_most_node, True) and \
-                                self.checkPattern(right_label_rule, left_most_node.label) and \
-                                self.checkPattern(right_eojul_rule, left_most_node, False) and \
-                                self.checkPattern(left_context_rule, left_context_node, True) and \
-                                self.checkPattern(right_context_rule, right_context_node, False) and \
-                                linear_rule:
+                        if right_most_node and left_most_node and \
+                           self.checkPattern(parent_label_rule, node.label) and \
+                           self.checkPattern(left_label_rule, right_most_node.label) and \
+                           self.checkPattern(left_eojul_rule, right_most_node, True) and \
+                           self.checkPattern(right_label_rule, left_most_node.label) and \
+                           self.checkPattern(right_eojul_rule, left_most_node, False) and \
+                           self.checkPattern(left_context_rule, left_context_node, True) and \
+                           self.checkPattern(right_context_rule, right_context_node, False) and \
+                           linear_rule:
 
                             if left_context_rule is not None and isinstance(left_context_node, Node) and self.checkPattern(left_context_rule, left_context_node, True):
                                 linear_rules.setdefault((left_context_node.index, right_most_node.index, left_most_node.index), [False, False])
@@ -624,7 +630,7 @@ class ConstitiuentStructureTree(object):
                             linear_rule_check = True
                             break
 
-                    if not linear_rule_check:
+                    if not linear_rule_check and right_most_node and right_node and node.left_child:
                         head_list.append((right_most_node.index, right_node.index, False, False, (node.left_child.label, node.left_child.label), False))
 
         if not self.head_final:
@@ -856,6 +862,8 @@ class ConstitiuentStructureTree(object):
             cnt_node = headers[node_idx]
             results.setdefault(node_idx, cnt_node)
             compose_eojul = self.composeHangul(cnt_node[1].split(" "))
+            if not compose_eojul:
+                return ori_sent, results, False
 
             for eojul_idx in range(start_eojul_idx, len(eojul_lists)):
                 if compose_eojul == eojul_lists[eojul_idx]:
