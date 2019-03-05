@@ -13,6 +13,7 @@
 
 # Execution
 > (rigid head): python SejongToDependency.py -root_dir corpus_folder_path -save_file result  -head_initial ./Rules/linear_rules.txt -head_final 1
+
 > (non-rigid head): python SejongToDependency.py -root_dir corpus_folder_path -save_file result  -head_initial_file ./Rules/linear_rules.txt -head_final 0
 
 
@@ -86,7 +87,8 @@ Transition-based 의존 구문 파서를 위한 데이터 변환
 
 # Execution
 
-> (ARC Standard + forward): python MakeTransitionCorpus.py -root_dir ./ -file_name *sejong.conll* -save_file *sejong_ARC_STANDARD.txt* -arc_standard  
+> (ARC Standard + forward): python MakeTransitionCorpus.py -root_dir ./ -file_name *sejong.conll* -save_file *sejong_ARC_STANDARD.txt* -arc_standard
+
 > (ARC Eager + backward): python MakeTransitionCorpus.py -root_dir ./ -file_name *sejong.conll* -save_file *sejong_ARC_EAGER.txt*
 
 ```
